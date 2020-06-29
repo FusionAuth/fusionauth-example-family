@@ -25,8 +25,8 @@ router.get('/oauth-redirect', function (req, res, next) {
         req.session.user = response.response.user;
       })
       .then((response) => {
-        if (req.session.state == "confirm-child") {
-          res.redirect(302, '/confirm-child');
+        if (req.session.state == "confirm-child-list") {
+          res.redirect(302, '/confirm-child-list');
           return
         }
         res.redirect(302, '/');
@@ -35,38 +35,78 @@ router.get('/oauth-redirect', function (req, res, next) {
       
 });
 
-/* Confirm child flow */
-router.get('/confirm-child', function (req, res, next) {
+/* Confirm child list flow */
+router.get('/confirm-child-list', function (req, res, next) {
   /*
 if (!req.session.user) {
     // force signin
-    req.session.child= req.query.child;
+    req.session.child = req.query.child;
     res.redirect(302, '/');
   }
  */
-  const childEmail = req.query.child;
-  if (childEmail === '') {
-    childEmail = req.session.child;
-  }
-  console.log(childEmail);
-  console.log(req.session.user.email);
-  
   client.retrievePendingChildren(req.session.user.email)
       .then((response) => {
-        return client.retrieveFamilies(req.session.user.id);
-      })
-      .then((response) => {
-        // if no families, create one for them
-        return client.retrieveFamilies(req.session.user.id);
-      })
-      .then((response) => {
-        console.log("here");
-        console.log(response);
-        console.log(response.response);
-        console.log(response.response.users);
         res.render('confirmchildren', {children: response.response.users, title: 'FusionAuth Confirm Children'});
       }).catch((err) => {console.log("in error"); console.error(JSON.stringify(err));});
 });
 
+/* Confirm child flow */
+router.post('/confirm-child', function (req, res, next) {
+  /*
+if (!req.session.user) {
+    // force signin
+    req.session.child = req.query.child;
+    res.redirect(302, '/');
+  }
+ */
+  childEmail = req.body.child;
+
+  if (!childEmail) {
+    console.log("No child email provided!");
+    res.redirect(302, '/');
+  }
+
+  console.log("here1");
+  let childUserId = undefined;
+  client.retrieveUserByEmail(childEmail)
+      .then((response) => {
+  console.log("here2");
+        console.log(response);
+        console.log(response.response.user);
+        childUserId = response.response.user.id;
+        return client.retrieveFamilies(req.session.user.id)
+      })
+      .then((response) => {
+        console.log(response);
+        if (response && response.response && response.response.families && response.response.families.length >= 1) {
+          // user is already in family
+          return response;
+        }
+  console.log("here4");
+        // if no families, create one for them
+        const familyRequest = {"familyMember": {"userId": req.session.user.id, "owner" : true, "role": "Adult" }};
+        return client.createFamily(null, familyRequest);
+      })
+      .then((response) => {
+  console.log("here5");
+        //only expect one
+        const familyId = response.response.families[0].id;
+        console.log(familyId);
+        console.log(childUserId);
+        const familyRequest = {"familyMember": {"userId": childUserId, "role": "Child" }}
+        console.log("family request when adding child: ");
+        console.log(familyRequest);
+        return client.addUserToFamily(familyId, familyRequest);
+      })
+      .then((response) => {
+  console.log("here6");
+        // now pull existing children to be confirmed
+        client.retrievePendingChildren(req.session.user.email)
+      })
+      .then((response) => {
+        console.log("here7");
+        res.redirect(302, '/confirm-child-list');
+      }).catch((err) => {console.log("in error"); console.error(JSON.stringify(err));});
+});
 
 module.exports = router;
