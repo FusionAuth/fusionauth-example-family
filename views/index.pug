@@ -14,7 +14,7 @@ block content
     if family
       ul 
         each val in family
-           p #{val.email}: #{val.role}
+           p #{val.email}
   else
     a(href='http://localhost:9011/oauth2/authorize?client_id='+clientId+'&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth-redirect&scope=offline_access') Login
 
