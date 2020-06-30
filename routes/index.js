@@ -4,6 +4,7 @@ const {FusionAuthClient} = require('@fusionauth/typescript-client');
 const clientId = '78bd26e9-51de-4af8-baf4-914ea5825355';
 const clientSecret = '3kkT8wOgidiafpmR-rYp0FyZsocWTGVYBVm_tXeZ_CI';
 const client = new FusionAuthClient('SNjNZj8jz4A_5BeL07pF901nwlLxRQ3CK6shpuIFQkg', 'http://localhost:9011');
+const consentId = '8d7d3e6e-1f5a-42bc-9f1a-2a9bbdaabd53';
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -102,6 +103,11 @@ router.post('/confirm-child', function (req, res, next) {
         const familyId = response.response.families[0].id;
         const familyRequest = {"familyMember": {"userId": childUserId, "role": "Child" }}
         return client.addUserToFamily(familyId, familyRequest);
+      })
+      .then((response) => {
+        // capture consent
+        const consentRequest = {"userConsent": {"userId": childUserId, "consentId": consentId, "giverUserId" : req.session.user.id }}
+        return client.createUserConsent(null, consentRequest);
       })
       .then((response) => {
         // now pull existing children to be confirmed
