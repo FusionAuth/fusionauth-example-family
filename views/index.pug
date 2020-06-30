@@ -2,11 +2,19 @@ extends layout
 
 
 block content
+  p Welcome to #{title}
+
   - var clientId = '78bd26e9-51de-4af8-baf4-914ea5825355'
   h1= title
   if user
     p Hello #{user.firstName}
+    p 
+      a(href='/confirm-child-list') View children to confirm
+    p Confirmed children
+    if family
+      ul 
+        each val in family
+           p #{val.email}: #{val.role}
   else
     a(href='http://localhost:9011/oauth2/authorize?client_id='+clientId+'&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth-redirect&scope=offline_access') Login
 
-  p Welcome to #{title}
