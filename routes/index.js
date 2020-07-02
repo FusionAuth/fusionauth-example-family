@@ -17,15 +17,43 @@ router.get('/', function (req, res, next) {
          if (response.response.families && response.response.families.length >= 1) {
            // adults can only belong to one family
            let children = response.response.families[0].members.filter(elem => elem.role != 'Adult');
-           let promises = children.map(elem => {
+           let getUsers = children.map(elem => {
              return client.retrieveUser(elem.userId);
            });
-           Promise.all(promises).then((values) => {
-             values.forEach(val => {
-               family.push( { "email" : val.response.user.email } );
+           Promise.all(getUsers).then((users) => {
+             users.forEach(user => {
+               family.push( { "id" : user.response.user.id, "email" : user.response.user.email } );
              });
+           }).then(() => {
+             let getUserConsentStatuses = children.map(elem => {
+               return client.retrieveUserConsents(elem.userId);
+             });
+             return Promise.all(getUserConsentStatuses);
+           }).then((consentsResponseArray) => {
+             // for each child, we'll want to get the status of the consent matching our consentId and put that in the family object, for that child.
+             const userIdToStatus = {};
+             const userIdToUserConsentId = {};
+             consentsResponseArray.forEach((oneRes) => { 
+               const matchingConsent =  oneRes.response.userConsents.filter( (userConsent) => userConsent.consent.id == consentId)[0];
+               if (matchingConsent) {
+                 const userId = matchingConsent.userId;
+                 userIdToUserConsentId[userId] = matchingConsent.id;
+                 userIdToStatus[userId] = matchingConsent.status;
+               }
+             }); 
+             console.log(userIdToStatus);
+             family = family.map((onePerson) => {
+               console.log(userIdToStatus[onePerson.id]);
+               onePerson["status"] = userIdToStatus[onePerson.id];
+               onePerson["userConsentId"] = userIdToUserConsentId[onePerson.id];
+               return onePerson;
+             });
+             console.log(family);
+           //}).then(() => {
              res.render('index', {family: family, user: req.session.user, title: 'Family Example'});
            });
+         } else {
+           res.render('index', {family: family, user: req.session.user, title: 'Family Example'});
          }
       }).catch((err) => {console.log("in error"); console.error(JSON.stringify(err));});
   } else {
@@ -115,6 +143,31 @@ router.post('/confirm-child', function (req, res, next) {
       })
       .then((response) => {
         res.redirect(302, '/confirm-child-list');
+      }).catch((err) => {console.log("in error"); console.error(JSON.stringify(err));});
+});
+
+/* Change consent */
+router.post('/change-consent-status', function (req, res, next) {
+  if (!req.session.user) {
+    // force signin
+    res.redirect(302, '/');
+  }
+  
+  const userConsentId = req.body.userConsentId;
+  let desiredStatus = req.body.desiredStatus;
+  if (desiredStatus != 'Active') {
+    desiredStatus = 'Revoked';
+  }
+
+  if (!userConsentId) {
+    console.log("No userConsentId provided!");
+    res.redirect(302, '/');
+  }
+
+  const patchBody = { userConsent : { status : desiredStatus } };
+  client.patchUserConsent(userConsentId, patchBody)
+      .then((response) => {
+        res.redirect(302, '/');
       }).catch((err) => {console.log("in error"); console.error(JSON.stringify(err));});
 });
 
