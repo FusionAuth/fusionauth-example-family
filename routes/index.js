@@ -41,14 +41,11 @@ router.get('/', function (req, res, next) {
                  userIdToStatus[userId] = matchingConsent.status;
                }
              }); 
-             console.log(userIdToStatus);
              family = family.map((onePerson) => {
-               console.log(userIdToStatus[onePerson.id]);
                onePerson["status"] = userIdToStatus[onePerson.id];
                onePerson["userConsentId"] = userIdToUserConsentId[onePerson.id];
                return onePerson;
              });
-             console.log(family);
            //}).then(() => {
              res.render('index', {family: family, user: req.session.user, title: 'Family Example'});
            });
