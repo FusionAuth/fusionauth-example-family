@@ -14,7 +14,7 @@ This assumes you already have a running FusionAuth instance, user and applicatio
 * update `routes/index.js` with your client secret and consent id.
 * `npm start`
 
-Go to http://localhost:3000/ and login with the previously created parent user TODO. You should now see a list of any children you must approved. Approve them and you can see them on the home page.
+Go to http://localhost:3000/ and login with the previously created parent user. You should now see a list of any children you must approve. Approve them and you can see them on the home page. You'll then be able to grant or revoke the consent for that child.
 
 ## TODO
 
