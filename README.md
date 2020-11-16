@@ -1,6 +1,7 @@
 # FusionAuth Family API example
 
 This project is an example Node.js application that illustrates how to leverage the FusionAuth family API.
+This application will use an OAuth Authorization Code workflow and the PKCE extension to log users in. PKCE stands for Proof Key for Code Exchange, and is often pronounced “pixie”.
 
 ## To run
 
@@ -10,7 +11,8 @@ This assumes you already have a running FusionAuth instance, user and applicatio
 * Create a parent user and a child user that is associated with the parent email. See the family guide for more information.
 * Create a consent in the FusionAuth admin screen. "Settings" -> "Consents". 
 * `npm install`
-* update `routes/index.js` and `views/index.pug` with the client id of your FusionAuth application.
+* update `routes/index.js` with your API key
+* update `routes/index.js`, `views/index.pug` and `confirmchildren.pug` with the client id of your FusionAuth application.
 * update `routes/index.js` with your client secret and consent id.
 * `npm start`
 

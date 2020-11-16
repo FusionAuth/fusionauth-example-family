@@ -6,7 +6,7 @@ block content
   p
     a(href='/') View family
 
-  - var clientId = '78bd26e9-51de-4af8-baf4-914ea5825355'
+  - var clientId = 'YOUR CLIENT ID'
   h1= title
   if children
     ul 
@@ -18,5 +18,5 @@ block content
                 |  
                 input(type='submit', value='Confirm')
   else
-    a(href='http://localhost:9011/oauth2/authorize?client_id='+clientId+'&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth-redirect&scope=offline_access') Login
+    a(href='http://localhost:9011/oauth2/authorize?client_id='+clientId+'&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth-redirect&scope=offline_access&code_challenge='+challenge+'&code_challenge_method=S256') Login
 
