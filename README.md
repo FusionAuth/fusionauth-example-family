@@ -12,7 +12,7 @@ This assumes you already have a running FusionAuth instance, user and applicatio
 * Create a consent in the FusionAuth admin screen. "Settings" -> "Consents". 
 * `npm install`
 * update `routes/index.js` with your API key
-* update `routes/index.js`, `views/index.pug` and `confirmchicldren.pug` with the client id of your FusionAuth application.
+* update `routes/index.js`, `views/index.pug` and `confirmchildren.pug` with the client id of your FusionAuth application.
 * update `routes/index.js` with your client secret and consent id.
 * `npm start`
 

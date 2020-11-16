@@ -6,7 +6,7 @@ const clientId = 'YOUR CLIENT ID';
 const clientSecret = 'YOUR CLIENT SECRET';
 const client = new FusionAuthClient('YOUR API KEY', 'http://localhost:9011');
 const consentId = 'YOUR CONSENT ID';
-
+const pkceChallenge = require('pkce-challenge');
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
